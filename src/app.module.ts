@@ -18,7 +18,8 @@ import { EventEnt } from './event.entity';
         EventEnt
       ],
       synchronize: true,
-    })
+    }),
+    TypeOrmModule.forFeature([EventEnt])
   ],
   controllers: [AppController, EventController],
   providers: [AppService],
