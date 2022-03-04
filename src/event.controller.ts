@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, MoreThan, Repository } from 'typeorm';
 import { CreateEventDTO } from './create-event.dto';
 import {  EventEnt } from './event.entity';
 import { UpdateEventDTO } from './update-event.dto';
@@ -18,11 +18,31 @@ export class EventController {
     return await this.repository.find();
   }
 
+  @Get('/practice')
+  async practice() {
+    return await this.repository.find({
+      select: ['id', 'when'],
+      where: [{
+        id: MoreThan(3),
+        when: MoreThan(new Date('2021-02-12T13:00:00'))
+      },{
+        description: Like('%meet%')
+      }],
+      take: 2,
+      order: {
+        id: 'DESC'
+      }
+    });
+  } 
+
   @Get(':id')
   async findOne(@Param('id') id) {
     const event = await this.repository.findOne(id)
     return event;
   }
+
+
+
 
   @Post()
   async create(@Body() input: CreateEventDTO) {
