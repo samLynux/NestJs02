@@ -11,6 +11,7 @@ import ormConfigProd from './config/orm.config.prod';
 
 import { EventEnt } from './events/event.entity';
 import { EventsModule } from './events/events.module';
+import { SchoolModule } from './school/school.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { EventsModule } from './events/events.module';
       useFactory: process.env.NODE_ENV !== 'production' ? 
         ormConfig : ormConfigProd
     }),
-    EventsModule
+    EventsModule,
+    SchoolModule
   ],
   controllers: [AppController],
   providers: [{
