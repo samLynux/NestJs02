@@ -5,6 +5,8 @@ import { AppController } from './app.controller';
 import { AppDummy } from './app.dummy';
 import { AppJapanService } from './app.japan.service';
 import { AppService } from './app.service';
+import ormConfig from './config/orm.config';
+import ormConfigProd from './config/orm.config.prod';
 
 
 import { EventEnt } from './events/event.entity';
@@ -12,18 +14,14 @@ import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DATABASE_HOST,
-      port: Number(process.env.DATABASE_PORT),
-      username: process.env.DATABASE_USER,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE_NAME,
-      entities: [
-        EventEnt
-      ],
-      synchronize: true,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [ormConfig],
+      expandVariables: true
+    }),
+    TypeOrmModule.forRootAsync({
+      useFactory: process.env.NODE_ENV !== 'production' ? 
+        ormConfig : ormConfigProd
     }),
     EventsModule
   ],
