@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, Logger, NotFoundException, Param, ParseIntPipe, Patch, Post, ValidationPipe } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, MoreThan, Repository } from 'typeorm';
+import { Attendee } from './attendee.entity';
 import { CreateEventDTO } from './create-event.dto';
 import {  EventEnt } from './event.entity';
 import { UpdateEventDTO } from './update-event.dto';
@@ -10,7 +11,9 @@ export class EventController {
   private readonly logger = new Logger(EventController.name);
   constructor(
     @InjectRepository(EventEnt)
-    private readonly repository: Repository<EventEnt>
+    private readonly repository: Repository<EventEnt>,
+    @InjectRepository(Attendee)
+    private readonly attendeerepository: Repository<Attendee>
   ) {}
 
   @Get()
@@ -40,9 +43,18 @@ export class EventController {
 
   @Get('/practice2')
   async practice2() {
-    return await this.repository.findOne(1,{
-      relations: ['attendees']}
-      );
+    const event = await this.repository.findOne(1,{
+      relations: ['attendees']
+    });
+
+    const attendee = new Attendee()
+    attendee.name = "cascade";
+    //attendee.event = event;
+
+    event.attendees.push(attendee);
+    await this.repository.save(event);
+
+    return event;
   } 
 
   @Get(':id')
