@@ -1,6 +1,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { paginate, paginateOptions } from 'src/pagination/paginator';
 import { Repository } from 'typeorm';
 import { AttendeeAnswerEnum } from './attendee.entity';
 import { EventEnt } from './event.entity';
@@ -37,11 +38,11 @@ private readonly logger = new Logger(EventService.name);
  
     }
 
-    public async getEventsWithAttendeeCountFiltered(filter?:ListEvents){
+    private async getEventsWithAttendeeCountFiltered(filter?:ListEvents){
         let query =   this.getEventWithAttendeeCountQuery();
 
         if(!filter){
-            return query.getMany();
+            return query;
         }
 
         if(filter.when){
@@ -63,7 +64,16 @@ private readonly logger = new Logger(EventService.name);
             }
         }
         
-        return await query.getMany();
+        return await query;
+    }
+
+    public async getEventsWithAttendeeCountFilteredPaginated(
+        filter:ListEvents, paginateOptions:paginateOptions){
+        
+        return await paginate(
+            await this.getEventsWithAttendeeCountFiltered(filter),
+            paginateOptions
+        );
     }
 
     public async getEvent(id:number): Promise<EventEnt | undefined>{
