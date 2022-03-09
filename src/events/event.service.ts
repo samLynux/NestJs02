@@ -5,7 +5,7 @@ import { User } from 'src/auth/user.entity';
 import { paginate, paginateOptions } from 'src/pagination/paginator';
 import { DeleteResult, Repository } from 'typeorm';
 import { AttendeeAnswerEnum } from './attendee.entity';
-import { EventEnt } from './event.entity';
+import { EventEnt, paginatedEvents } from './event.entity';
 import { CreateEventDTO } from './input/create-event.dto';
 import { ListEvents, WhenEventFilter } from './input/list.events';
 import { UpdateEventDTO } from './input/update-event.dto';
@@ -71,7 +71,7 @@ private readonly logger = new Logger(EventService.name);
     }
 
     public async getEventsWithAttendeeCountFilteredPaginated(
-        filter:ListEvents, paginateOptions:paginateOptions){
+        filter:ListEvents, paginateOptions:paginateOptions):Promise<paginatedEvents>{
         
         return await paginate(
             await this.getEventsWithAttendeeCountFiltered(filter),
@@ -109,5 +109,19 @@ private readonly logger = new Logger(EventService.name);
         
         return await this.eventsRepository.createQueryBuilder('e')
             .delete().where('id = :id', {id}).execute();
+    }
+    public async getEventsOrganizedByUserIdPaginated(userid:number, paginatedOptions: paginateOptions)
+        :Promise<paginatedEvents>{
+        
+        return await paginate<EventEnt>(
+            this.getEventsOrganizedByUserIdQuery(userid),
+            paginatedOptions
+        )
+    }
+
+    private getEventsOrganizedByUserIdQuery(userid:number){
+        
+        return this.getEventsBasedQuery()
+            .where('e.organizerId = :userId', {userid});
     }
 }
