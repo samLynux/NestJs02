@@ -4,6 +4,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from "bcrypt";
 import { Repository } from "typeorm";
 import { Attendee } from "./attendee.entity";
+import { CreateAttendeeDTO } from "./input/create-attendee.dto";
 
 @Injectable()
 export class AttendeeService{
@@ -26,12 +27,13 @@ export class AttendeeService{
         })
     }
 
-    public async createOrUpdate(input:any, eventId:number, userId:number): Promise<Attendee> {
+    public async createOrUpdate(input:CreateAttendeeDTO, eventId:number, userId:number): Promise<Attendee> {
         const attendee = await this.findOneByEventIdAndUserId(eventId,userId)
             ?? new Attendee();
 
         attendee.eventId = eventId;
         attendee.userId = userId;
+        attendee.answer = input.answer;
 
         return await this.attendeeRepository.save(attendee);
     }
