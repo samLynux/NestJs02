@@ -1,12 +1,7 @@
 import { Body, ClassSerializerInterceptor, Controller, Delete, ForbiddenException, Get, HttpCode, Logger, NotFoundException, Param, ParseIntPipe, Patch, Post, Query, SerializeOptions, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { AuthGuardJwt } from 'src/auth/auth-guard.jwt';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/auth/user.entity';
-import { Like, MoreThan, Repository } from 'typeorm';
-import { Attendee } from './attendee.entity';
-
-import {  EventEnt } from './event.entity';
 import { EventService } from './event.service';
 import { CreateEventDTO } from './input/create-event.dto';
 import { ListEvents } from './input/list.events';

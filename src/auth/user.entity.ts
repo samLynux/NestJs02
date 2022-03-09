@@ -1,4 +1,5 @@
 import { Expose } from "class-transformer";
+import { Attendee } from "src/events/attendee.entity";
 import { EventEnt } from "src/events/event.entity";
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Profile } from "./profile.entity";
@@ -36,4 +37,7 @@ export class User {
   @OneToMany(() => EventEnt, (event) => event.organizer)
   @Expose()
   organized: EventEnt[]
+
+  @OneToMany(() => Attendee, (attendee) => attendee.user)
+  attended:Attendee[]
 }
