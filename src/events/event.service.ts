@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/auth/user.entity';
 import { paginate, paginateOptions } from 'src/pagination/paginator';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, Repository, SelectQueryBuilder } from 'typeorm';
 import { AttendeeAnswerEnum } from './attendee.entity';
 import { EventEnt, paginatedEvents } from './event.entity';
 import { CreateEventDTO } from './input/create-event.dto';
@@ -19,13 +19,13 @@ private readonly logger = new Logger(EventService.name);
   ){}
 
 
-  private getEventsBasedQuery(){
+  private getEventsBasedQuery():SelectQueryBuilder<EventEnt>{
       return this.eventsRepository
         .createQueryBuilder('e')
         .orderBy('e.id','DESC');
   }
 
-    public  getEventWithAttendeeCountQuery(){
+    public  getEventWithAttendeeCountQuery():SelectQueryBuilder<EventEnt>{
         return this.getEventsBasedQuery()
             .loadRelationCountAndMap('e.attendeeCount',  'e.attendees')
             .loadRelationCountAndMap('e.attendeeAccepted','e.attendees','attendee', 
@@ -41,7 +41,8 @@ private readonly logger = new Logger(EventService.name);
  
     }
 
-    private async getEventsWithAttendeeCountFiltered(filter?:ListEvents){
+    private getEventsWithAttendeeCountFilteredQuery(filter?:ListEvents)
+            :SelectQueryBuilder<EventEnt>{
         let query =   this.getEventWithAttendeeCountQuery();
 
         if(!filter){
@@ -67,19 +68,19 @@ private readonly logger = new Logger(EventService.name);
             }
         }
         
-        return await query;
+        return query;
     }
 
     public async getEventsWithAttendeeCountFilteredPaginated(
         filter:ListEvents, paginateOptions:paginateOptions):Promise<paginatedEvents>{
         
         return await paginate(
-            await this.getEventsWithAttendeeCountFiltered(filter),
+            await this.getEventsWithAttendeeCountFilteredQuery(filter),
             paginateOptions
         );
     }
 
-    public async getEvent(id:number): Promise<EventEnt | undefined>{
+    public async getEventWithAttendeeCount(id:number): Promise<EventEnt | undefined>{
         const query =   this.getEventWithAttendeeCountQuery()
             .andWhere('e.id = :id',  {id});
 
@@ -87,22 +88,29 @@ private readonly logger = new Logger(EventService.name);
         return await query.getOne();
     }
 
+    
+    public async findOne(id:number): Promise<EventEnt | undefined>{
+        
+        return await this.eventsRepository.findOne(id)
+    }
+
     public async createEvent(input:CreateEventDTO, user:User): Promise<EventEnt>{
         
-        return await this.eventsRepository.save({
-            ...input,
+        return await this.eventsRepository.save(
+            new EventEnt({...input,
             organizer: user,
-            when: new Date(input.when)
-        })
+            when: new Date(input.when)}
+            )
+        )
     }
 
     public async updateEvent(input:UpdateEventDTO, event:EventEnt): Promise<EventEnt>{
         
-        return await this.eventsRepository.save( {
-            ...event,
+        return await this.eventsRepository.save( 
+            new EventEnt({...event,
             ...input,
-            when: input.when ?  new Date(input.when) : event.when,
-          });
+            when: input.when ?  new Date(input.when) : event.when})
+          );
     }
 
     public async deleteEvent(id:number): Promise<DeleteResult>{
@@ -119,7 +127,7 @@ private readonly logger = new Logger(EventService.name);
         )
     }
 
-    private getEventsOrganizedByUserIdQuery(userid:number){
+    private getEventsOrganizedByUserIdQuery(userid:number):SelectQueryBuilder<EventEnt>{
         
         return this.getEventsBasedQuery()
             .where('e.organizerId = :userId', {userid});
@@ -134,7 +142,7 @@ private readonly logger = new Logger(EventService.name);
         )
     }
 
-    private getEventsAttendedByUserIdQuery(userid:number){
+    private getEventsAttendedByUserIdQuery(userid:number):SelectQueryBuilder<EventEnt>{
         
         return this.getEventsBasedQuery()
             .leftJoinAndSelect('e.attendees','a')

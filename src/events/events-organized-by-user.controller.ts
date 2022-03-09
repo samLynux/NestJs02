@@ -1,4 +1,4 @@
-import { ClassSerializerInterceptor, Controller, Get, Param, Query, SerializeOptions, UseInterceptors } from "@nestjs/common";
+import { ClassSerializerInterceptor, Controller, DefaultValuePipe, Get, Param, ParseIntPipe, Query, SerializeOptions, UseInterceptors } from "@nestjs/common";
 
 import { EventService } from "./event.service";
 
@@ -12,7 +12,7 @@ export class EventsOrganizedByUser{
 
     @Get()
     @UseInterceptors(ClassSerializerInterceptor)
-    async findAll(@Param('userId') userId: number, @Query('page') page = 1) {
+    async findAll(@Param('userId',ParseIntPipe) userId: number, @Query('page',new DefaultValuePipe(1),ParseIntPipe) page = 1) {
         const attendees = await this.eventService.getEventsOrganizedByUserIdPaginated(
             userId,
             {
