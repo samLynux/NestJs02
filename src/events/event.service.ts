@@ -8,6 +8,7 @@ import { AttendeeAnswerEnum } from './attendee.entity';
 import { EventEnt } from './event.entity';
 import { CreateEventDTO } from './input/create-event.dto';
 import { ListEvents, WhenEventFilter } from './input/list.events';
+import { UpdateEventDTO } from './input/update-event.dto';
 
 @Injectable()
 export class EventService {
@@ -93,6 +94,15 @@ private readonly logger = new Logger(EventService.name);
             organizer: user,
             when: new Date(input.when)
         })
+    }
+
+    public async updateEvent(input:UpdateEventDTO, event:EventEnt): Promise<EventEnt>{
+        
+        return await this.eventsRepository.save( {
+            ...event,
+            ...input,
+            when: input.when ?  new Date(input.when) : event.when,
+          });
     }
 
     public async deleteEvent(id:number): Promise<DeleteResult>{
