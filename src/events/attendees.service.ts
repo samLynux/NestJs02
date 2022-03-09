@@ -19,4 +19,21 @@ export class AttendeeService{
         })
     }
 
+    public async findOneByEventIdAndUserId(eventId:number, userId:number): Promise<Attendee | undefined> {
+        return await this.attendeeRepository.findOne({
+            event: {id:eventId},
+            user: {id:userId}
+        })
+    }
+
+    public async createOrUpdate(input:any, eventId:number, userId:number): Promise<Attendee> {
+        const attendee = await this.findOneByEventIdAndUserId(eventId,userId)
+            ?? new Attendee();
+
+        attendee.eventId = eventId;
+        attendee.userId = userId;
+
+        return await this.attendeeRepository.save(attendee);
+    }
+
 }

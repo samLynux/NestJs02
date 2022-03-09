@@ -124,4 +124,20 @@ private readonly logger = new Logger(EventService.name);
         return this.getEventsBasedQuery()
             .where('e.organizerId = :userId', {userid});
     }
+
+    public async getEventsAttendedByUserIdPaginated(userid:number, paginatedOptions: paginateOptions)
+        :Promise<paginatedEvents>{
+        
+        return await paginate<EventEnt>(
+            this.getEventsAttendedByUserIdQuery(userid),
+            paginatedOptions
+        )
+    }
+
+    private getEventsAttendedByUserIdQuery(userid:number){
+        
+        return this.getEventsBasedQuery()
+            .leftJoinAndSelect('e.attendees','a')
+            .where('a.userId = :userId', {userid});
+    }
 }
