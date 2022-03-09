@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, ForbiddenException, Get, HttpCode, Logger, NotFoundException, Param, ParseIntPipe, Patch, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Delete, ForbiddenException, Get, HttpCode, Logger, NotFoundException, Param, ParseIntPipe, Patch, Post, Query, SerializeOptions, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthGuardJwt } from 'src/auth/auth-guard.jwt';
 import { CurrentUser } from 'src/auth/current-user.decorator';
@@ -13,6 +13,7 @@ import { ListEvents } from './input/list.events';
 import { UpdateEventDTO } from './input/update-event.dto';
 
 @Controller('events')
+@SerializeOptions({strategy:'excludeAll'})
 export class EventController {
   private readonly logger = new Logger(EventController.name);
   constructor(
@@ -25,6 +26,7 @@ export class EventController {
 
   @Get()
   @UsePipes(new ValidationPipe({transform: true}))
+  @UseInterceptors(ClassSerializerInterceptor)
   async findAll(@Query() filter: ListEvents) {
     const events = await this.eventService.getEventsWithAttendeeCountFilteredPaginated(
         filter,
@@ -72,6 +74,7 @@ export class EventController {
   // } 
 
   @Get(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
   async findOne(@Param('id', ParseIntPipe) id: number) {
     
     const event = await this.eventService.getEvent(id)
@@ -90,6 +93,7 @@ export class EventController {
 
   @Post()
   @UseGuards(AuthGuardJwt)
+  @UseInterceptors(ClassSerializerInterceptor)
   async create(@Body() input: CreateEventDTO, @CurrentUser() user:User) {
     return await this.eventService.createEvent(input,user)
     
@@ -97,6 +101,7 @@ export class EventController {
 
   @Patch(':id')
   @UseGuards(AuthGuardJwt)
+  @UseInterceptors(ClassSerializerInterceptor)
   async update(@Param('id') id, @Body() input: UpdateEventDTO, @CurrentUser() user:User) {
     const event = await this.eventService.getEvent(id)
     if(!event){
