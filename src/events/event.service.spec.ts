@@ -1,19 +1,21 @@
-import { User } from "./../auth/user.entity";
-import { createQueryBuilder, Repository } from "typeorm";
 import { EventEnt } from "./event.entity";
 import { EventService } from "./event.service";
-import { ListEvents } from "./input/list.events";
-import { NotFoundException } from "@nestjs/common";
 import {Test} from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
+import * as paginator from "./../pagination/paginator"
+import { Repository } from "typeorm";
+
+jest.mock('./../pagination/paginator');
 
 describe('EventService', () => {
     let service:EventService;
     let repository:Repository<EventEnt>;
     let selectQB;
     let deleteQB;
+    let mockedPaginate;
 
     beforeEach(async () => {
+        mockedPaginate = paginator.paginate as jest.Mock;
         deleteQB = {
             where: jest.fn(),
             execute: jest.fn(),
@@ -81,7 +83,51 @@ describe('EventService', () => {
             expect(whereSpy).toBeCalledTimes(1);
             expect(whereSpy).toBeCalledWith('id = :id', {id:1});
             expect(executeSpy).toBeCalledTimes(1);
-        })
-    })
+        });
+    });
+
+    describe('getEventsAttendedByUserIdPaginated',  () => {
+        it('should return events paginated', async() => {
+            const orderBySpy = jest.spyOn(selectQB, 'orderBy').mockReturnValue(selectQB);
+            const leftJoinSpy = jest.spyOn(selectQB, 'leftJoinAndSelect').mockReturnValue(selectQB);
+            const whereSpy = jest.spyOn(selectQB, 'where').mockReturnValue(selectQB);
+
+            mockedPaginate.mockResolvedValue({
+                first:1,
+                last:1,
+                total:10,
+                limit:10,
+                data: []
+            })
+
+            expect(service.getEventsAttendedByUserIdPaginated(
+                500,
+                {limit:1, currentPage:1}
+            )).resolves.toEqual({
+                first:1,
+                last:1,
+                total:10,
+                limit:10,
+                data: []
+            });
+
+            expect(orderBySpy).toBeCalledTimes(1);
+            expect(orderBySpy).toBeCalledWith('e.id', 'DESC');
+
+            expect(leftJoinSpy).toBeCalledTimes(1);
+            expect(leftJoinSpy).toBeCalledWith('e.attendees', 'a');
+
+            expect(whereSpy).toBeCalledTimes(1);
+            expect(whereSpy).toBeCalledWith('a.userId = :userId', {userid:500});
+
+            expect(mockedPaginate).toBeCalledTimes(1);
+            expect(mockedPaginate).toBeCalledWith(
+                selectQB,
+                {
+                    currentPage:1, limit:1
+                }
+            );
+        });
+    });
     
 })
