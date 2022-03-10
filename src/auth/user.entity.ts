@@ -1,6 +1,6 @@
 import { Expose } from "class-transformer";
-import { Attendee } from "src/events/attendee.entity";
-import { EventEnt } from "src/events/event.entity";
+import { Attendee } from "./../events/attendee.entity";
+import { EventEnt } from "./../events/event.entity";
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Profile } from "./profile.entity";
 

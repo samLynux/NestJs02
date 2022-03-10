@@ -1,6 +1,6 @@
 import { registerAs } from "@nestjs/config";
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
-import { EventEnt } from "src/events/event.entity";
+import { EventEnt } from "./../events/event.entity";
 
 export default registerAs('orm.config', ():TypeOrmModuleOptions => ({
     type: 'mysql',

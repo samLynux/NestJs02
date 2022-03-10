@@ -1,7 +1,7 @@
 import { Body, ClassSerializerInterceptor, Controller, Delete, ForbiddenException, Get, HttpCode, Logger, NotFoundException, Param, ParseIntPipe, Patch, Post, Query, SerializeOptions, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
-import { AuthGuardJwt } from 'src/auth/auth-guard.jwt';
-import { CurrentUser } from 'src/auth/current-user.decorator';
-import { User } from 'src/auth/user.entity';
+import { AuthGuardJwt } from './../auth/auth-guard.jwt';
+import { CurrentUser } from './../auth/current-user.decorator';
+import { User } from './../auth/user.entity';
 import { EventService } from './event.service';
 import { CreateEventDTO } from './input/create-event.dto';
 import { ListEvents } from './input/list.events';
@@ -116,7 +116,6 @@ export class EventController {
   @UseGuards(AuthGuardJwt)
   @HttpCode(204)
   async remove(@Param('id',ParseIntPipe) id, @CurrentUser() user:User) {
-    console.log("sdads");
     
     const event = await this.eventService.findOne(id)
     if(!event){
