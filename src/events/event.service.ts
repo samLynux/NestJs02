@@ -127,10 +127,11 @@ private readonly logger = new Logger(EventService.name);
         )
     }
 
-    private getEventsOrganizedByUserIdQuery(userid:number):SelectQueryBuilder<EventEnt>{
+    private getEventsOrganizedByUserIdQuery(userId:number):SelectQueryBuilder<EventEnt>{
+        //console.log(userId);
         
         return this.getEventsBasedQuery()
-            .where('e.organizerId = :userId', {userid});
+            .where('e.organizerId = :userId', {userId});
     }
 
     public async getEventsAttendedByUserIdPaginated(userid:number, paginatedOptions: paginateOptions)

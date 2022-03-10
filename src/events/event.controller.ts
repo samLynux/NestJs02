@@ -116,6 +116,8 @@ export class EventController {
   @UseGuards(AuthGuardJwt)
   @HttpCode(204)
   async remove(@Param('id',ParseIntPipe) id, @CurrentUser() user:User) {
+    console.log("sdads");
+    
     const event = await this.eventService.findOne(id)
     if(!event){
       throw new NotFoundException();
